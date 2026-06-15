@@ -1,0 +1,531 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Gushungo Snake — Zimbabwe Edition</title>
+<style>
+  :root{
+    --body:#2b3a55;          /* Nokia body navy */
+    --body-edge:#1b2740;
+    --body-hi:#3d5176;
+    --key:#cfd6e0;
+    --key-edge:#9aa4b4;
+    --key-text:#26324a;
+    --screen-frame:#10161f;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html,body{height:100%}
+  body{
+    margin:0;
+    background:
+      radial-gradient(1200px 600px at 50% -10%, #20323f 0%, #0c1118 60%, #06080c 100%);
+    font-family:"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    color:#b9c4d4;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;
+    min-height:100%;padding:18px 12px;gap:14px;
+  }
+  .tagline{font-size:12px;letter-spacing:.18em;text-transform:uppercase;color:#5e7793;text-align:center}
+  .tagline b{color:#9fb6cf}
+
+  /* ---- The phone ---- */
+  .phone{
+    width:300px;max-width:94vw;
+    background:linear-gradient(160deg,var(--body-hi),var(--body) 32%,var(--body-edge));
+    border-radius:46px 46px 70px 70px / 60px 60px 120px 120px;
+    padding:22px 20px 26px;
+    box-shadow:
+      inset 0 2px 0 rgba(255,255,255,.14),
+      inset 0 -10px 24px rgba(0,0,0,.45),
+      0 26px 50px rgba(0,0,0,.55);
+    position:relative;
+  }
+  .speaker{width:64px;height:7px;border-radius:5px;margin:0 auto 14px;
+    background:#141d2c;box-shadow:inset 0 1px 2px #000,0 1px 0 rgba(255,255,255,.06)}
+  .brand{position:absolute;top:18px;right:26px;font-weight:800;letter-spacing:.04em;
+    color:#aeb9c9;font-size:13px;opacity:.85}
+
+  /* ---- Screen ---- */
+  .screen-frame{
+    background:linear-gradient(180deg,#0a0f16,#161f2b);
+    border-radius:12px;padding:12px;
+    box-shadow:inset 0 0 0 2px #05080d, inset 0 4px 12px rgba(0,0,0,.7);
+  }
+  .lcd{
+    position:relative;width:100%;display:block;border-radius:4px;
+    image-rendering:pixelated;image-rendering:crisp-edges;
+    background:#a8c63f;
+    box-shadow:inset 0 0 22px rgba(0,0,0,.28);
+  }
+  canvas{display:block;width:100%;height:auto;image-rendering:pixelated;border-radius:4px}
+
+  /* ---- Keypad ---- */
+  .pad{margin-top:18px;display:flex;flex-direction:column;align-items:center;gap:12px}
+  .softrow{display:flex;justify-content:space-between;width:200px}
+  .soft{
+    width:58px;height:26px;border-radius:6px 6px 14px 14px;
+    background:linear-gradient(180deg,var(--key),var(--key-edge));
+    color:var(--key-text);border:none;font-weight:700;font-size:11px;letter-spacing:.05em;
+    box-shadow:0 2px 0 #7e8898,0 3px 6px rgba(0,0,0,.4);cursor:pointer;
+  }
+  .navwrap{position:relative;width:150px;height:150px}
+  .dpad{position:absolute;inset:0}
+  .dbtn{
+    position:absolute;background:linear-gradient(180deg,var(--key),var(--key-edge));
+    border:none;cursor:pointer;color:var(--key-text);font-size:16px;font-weight:800;
+    box-shadow:0 2px 0 #818b9b,0 4px 8px rgba(0,0,0,.4);
+  }
+  .dbtn:active{transform:translateY(2px);box-shadow:0 0 0 #818b9b}
+  .up{top:0;left:46px;width:58px;height:54px;border-radius:30px 30px 8px 8px}
+  .down{bottom:0;left:46px;width:58px;height:54px;border-radius:8px 8px 30px 30px}
+  .left{left:0;top:46px;width:54px;height:58px;border-radius:30px 8px 8px 30px}
+  .right{right:0;top:46px;width:54px;height:58px;border-radius:8px 30px 30px 8px}
+  .ok{position:absolute;left:50px;top:50px;width:50px;height:50px;border-radius:50%;
+    background:radial-gradient(circle at 38% 30%,#eef2f7,#aab3c2);
+    border:none;cursor:pointer;color:#26324a;font-weight:800;font-size:11px;
+    box-shadow:0 2px 0 #818b9b,0 5px 10px rgba(0,0,0,.45)}
+  .ok:active{transform:translateY(2px)}
+
+  /* ---- Options ---- */
+  .opts{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;max-width:320px}
+  .opt{
+    background:#16202e;border:1px solid #2b3a52;color:#9fb6cf;
+    padding:7px 12px;border-radius:999px;font-size:12px;letter-spacing:.04em;cursor:pointer;
+    text-transform:uppercase;transition:background .15s,color .15s,border-color .15s;
+  }
+  .opt[aria-pressed="true"]{background:#1f8a3a;border-color:#2bd45f;color:#eafff0}
+  .opt:focus-visible,.dbtn:focus-visible,.ok:focus-visible,.soft:focus-visible{outline:2px solid #ffd200;outline-offset:2px}
+  .hint{font-size:11px;color:#5e7793;text-align:center;max-width:320px;line-height:1.5}
+  a{color:#7fa8d8}
+  @media (prefers-reduced-motion: reduce){*{animation:none !important}}
+</style>
+</head>
+<body>
+  <div class="tagline">Nokia&nbsp;3310 Snake II &nbsp;·&nbsp; <b>Zimbabwe Edition</b></div>
+
+  <div class="phone" role="application" aria-label="Snake game">
+    <span class="brand">NOKIA</span>
+    <div class="speaker"></div>
+    <div class="screen-frame">
+      <div class="lcd">
+        <canvas id="game" width="336" height="242"></canvas>
+      </div>
+    </div>
+
+    <div class="pad">
+      <div class="softrow">
+        <button class="soft" id="startBtn">Start</button>
+        <button class="soft" id="pauseBtn">Pause</button>
+      </div>
+      <div class="navwrap">
+        <div class="dpad">
+          <button class="dbtn up"    data-dir="up"    aria-label="Up">▲</button>
+          <button class="dbtn down"  data-dir="down"  aria-label="Down">▼</button>
+          <button class="dbtn left"  data-dir="left"  aria-label="Left">◀</button>
+          <button class="dbtn right" data-dir="right" aria-label="Right">▶</button>
+          <button class="ok" id="okBtn" aria-label="Select">OK</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="opts">
+    <button class="opt" id="optSound"  aria-pressed="true">🔊 Sound</button>
+    <button class="opt" id="optTheme"  aria-pressed="false">🎨 Flag colours</button>
+    <button class="opt" id="optWalls"  aria-pressed="false">🧱 Solid walls</button>
+    <button class="opt" id="optMaze"   aria-pressed="false">🌀 Maze</button>
+  </div>
+  <div class="hint">
+    Arrow keys / WASD or the D-pad to steer · <b>Space</b> to start &amp; pause · on mobile, tap the <b>edge zones</b> (arrows) to steer, tap centre to start/pause.<br>
+    Wrap-around walls and bonus items, just like Snake&nbsp;II.
+  </div>
+
+<script>
+(() => {
+  "use strict";
+
+  // ---------- Grid / canvas ----------
+  const COLS = 24, ROWS = 16, CELL = 14;
+  const HUD = 26;                         // top status strip (px)
+  const W = COLS * CELL, FH = ROWS * CELL;
+  const cv = document.getElementById('game');
+  const ctx = cv.getContext('2d');
+  cv.width = W; cv.height = HUD + FH;
+  ctx.imageSmoothingEnabled = false;
+
+  // ---------- Pixel-text helper (renders a font, blits scaled, no smoothing) ----------
+  const tc = document.createElement('canvas');
+  const tcx = tc.getContext('2d');
+  function pixelText(text, x, y, opts={}) {
+    const base = opts.base || 9, scale = opts.scale || 2;
+    const color = opts.color || pal.ink, align = opts.align || 'left';
+    tcx.font = `bold ${base}px "Lucida Console","Courier New",monospace`;
+    const w = Math.max(1, Math.ceil(tcx.measureText(text).width));
+    const h = Math.ceil(base * 1.25);
+    tc.width = w; tc.height = h;
+    tcx.font = `bold ${base}px "Lucida Console","Courier New",monospace`;
+    tcx.textBaseline = 'top'; tcx.fillStyle = color;
+    tcx.clearRect(0, 0, w, h);
+    tcx.fillText(text, 0, 0);
+    const dw = w * scale, dh = h * scale;
+    let dx = x;
+    if (align === 'center') dx = x - dw / 2;
+    if (align === 'right')  dx = x - dw;
+    ctx.imageSmoothingEnabled = false;
+    ctx.drawImage(tc, 0, 0, w, h, Math.round(dx), Math.round(y), dw, dh);
+  }
+
+  // ---------- Palettes ----------
+  const LCD = { screen:'#a8c63f', dim:'#86a531', ink:'#1c2a10', faint:'#93b536', star:'#1c2a10' };
+  // Zimbabwe flag-ish: dark field, snake cycles flag colours.
+  const ZW  = { screen:'#0d0f0d', dim:'#1b2a1b', ink:'#ffd200', faint:'#27331f', star:'#de2010',
+                cycle:['#1f9d3b','#ffd200','#de2010'] };
+  let theme = 'lcd';
+  let pal = LCD;
+  function applyTheme(){
+    pal = theme === 'zw' ? ZW : LCD;
+    document.querySelector('.lcd').style.background = pal.screen;
+  }
+
+  // ---------- State ----------
+  const DIRS = { up:{x:0,y:-1}, down:{x:0,y:1}, left:{x:-1,y:0}, right:{x:1,y:0} };
+  let snake, dir, nextDir, food, bonus, walls, maze, mazeCells;
+  let score, high = loadHigh(), level, alive, started, paused;
+  let stepMs, acc = 0, last = 0, blink = 0, foodsEaten;
+
+  function loadHigh(){ try { return parseInt(localStorage.getItem('gushungo-high')||'0',10)||0; } catch(e){ return 0; } }
+  function saveHigh(v){ try { localStorage.setItem('gushungo-high', String(v)); } catch(e){} }
+
+  function buildMaze(){
+    mazeCells = new Set();
+    if (!maze) return;
+    const add = (x,y)=>mazeCells.add(x+','+y);
+    // two horizontal bars, leaving gaps — evokes Snake II maze levels
+    const r1 = 5, r2 = ROWS-6;
+    for (let x=3; x<COLS-3; x++){ if (x<10||x>13) { add(x,r1); add(x,r2); } }
+  }
+  const isMaze = (x,y)=> mazeCells && mazeCells.has(x+','+y);
+
+  function reset(){
+    const cx = Math.floor(COLS/2), cy = Math.floor(ROWS/2);
+    snake = [{x:cx-1,y:cy},{x:cx-2,y:cy},{x:cx-3,y:cy}];
+    dir = DIRS.right; nextDir = DIRS.right;
+    score = 0; level = 1; foodsEaten = 0; stepMs = 150;
+    alive = true; paused = false; bonus = null;
+    buildMaze(); placeFood();
+  }
+
+  function freeCell(){
+    let c, guard = 0;
+    do {
+      c = { x: (Math.random()*COLS)|0, y: (Math.random()*ROWS)|0 };
+      guard++;
+    } while (guard < 999 && (occupied(c.x,c.y) || isMaze(c.x,c.y)));
+    return c;
+  }
+  function occupied(x,y){ return snake.some(s=>s.x===x&&s.y===y); }
+
+  function placeFood(){ food = freeCell(); }
+  function maybeBonus(){
+    if (bonus || foodsEaten === 0 || foodsEaten % 4 !== 0) return;
+    bonus = Object.assign(freeCell(), { ttl: 5200 }); // ms
+  }
+
+  // ---------- Sound (Web Audio square beeps) ----------
+  let actx = null, soundOn = true;
+  function beep(freq, dur, type='square', vol=0.06){
+    if (!soundOn) return;
+    try {
+      actx = actx || new (window.AudioContext||window.webkitAudioContext)();
+      const o = actx.createOscillator(), g = actx.createGain();
+      o.type = type; o.frequency.value = freq;
+      o.connect(g); g.connect(actx.destination);
+      const t = actx.currentTime;
+      g.gain.setValueAtTime(vol, t);
+      g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+      o.start(t); o.stop(t + dur);
+    } catch(e){}
+  }
+  const sEat   = ()=> beep(880, .07);
+  const sBonus = ()=>{ beep(990,.08); setTimeout(()=>beep(1320,.10),80); };
+  const sTurn  = ()=> beep(420,.02,'square',.03);
+  const sStart = ()=>{ beep(660,.09); setTimeout(()=>beep(880,.09),100); setTimeout(()=>beep(1175,.13),200); };
+  const sDie   = ()=>{ beep(300,.12,'square',.07); setTimeout(()=>beep(180,.22,'square',.07),120); };
+
+  // ---------- Input ----------
+  function setDir(name){
+    if (!started || paused || !alive) return;
+    const d = DIRS[name]; if (!d) return;
+    if (d.x === -dir.x && d.y === -dir.y) return; // no reversing
+    if (d.x === nextDir.x && d.y === nextDir.y) return;
+    nextDir = d; sTurn();
+  }
+  const keymap = {ArrowUp:'up',ArrowDown:'down',ArrowLeft:'left',ArrowRight:'right',
+                  w:'up',s:'down',a:'left',d:'right',W:'up',S:'down',A:'left',D:'right'};
+  window.addEventListener('keydown', e=>{
+    if (keymap[e.key]){ e.preventDefault(); setDir(keymap[e.key]); }
+    else if (e.key === ' '){ e.preventDefault(); primary(); }
+    else if (e.key === 'p' || e.key === 'P'){ togglePause(); }
+  });
+  document.querySelectorAll('.dbtn').forEach(b=>{
+    b.addEventListener('click', ()=>setDir(b.dataset.dir));
+  });
+  document.getElementById('okBtn').addEventListener('click', primary);
+  document.getElementById('startBtn').addEventListener('click', ()=>{ if(!started||!alive) restart(); });
+  document.getElementById('pauseBtn').addEventListener('click', togglePause);
+
+  // ---------- Touch-zone controls ----------
+  // Canvas divided into 4 diagonal quadrants; direction fires on touchstart (instant).
+  // A small central dead-zone acts as start / pause.
+  let touchFlash = null; // { dir:'up'|'down'|'left'|'right', until:timestamp }
+
+  function getZone(clientX, clientY){
+    const rect = cv.getBoundingClientRect();
+    const cx = (clientX - rect.left) / rect.width;   // 0-1
+    const cy = (clientY - rect.top)  / rect.height;  // 0-1
+    const hudFrac = HUD / cv.height;
+    if (cy < hudFrac) return null;                    // tapped HUD strip
+    const nx = cx - 0.5;
+    const ny = (cy - hudFrac) / (1 - hudFrac) - 0.5;
+    if (Math.abs(nx) < 0.12 && Math.abs(ny) < 0.12) return 'center';
+    return Math.abs(ny) > Math.abs(nx)
+      ? (ny < 0 ? 'up' : 'down')
+      : (nx < 0 ? 'left' : 'right');
+  }
+
+  cv.addEventListener('touchstart', e=>{
+    e.preventDefault();
+    if (actx && actx.state === 'suspended') actx.resume();
+    const t = e.touches[0];
+    const zone = getZone(t.clientX, t.clientY);
+    if (!zone || zone === 'center'){ primary(); return; }
+    touchFlash = { dir: zone, until: performance.now() + 240 };
+    setDir(zone);
+  }, {passive: false});
+
+  function primary(){
+    if (actx && actx.state === 'suspended') actx.resume();
+    if (!started || !alive){ restart(); }
+    else { togglePause(); }
+  }
+  function togglePause(){ if (started && alive){ paused = !paused; } }
+  function restart(){ reset(); started = true; sStart(); }
+
+  // ---------- Options ----------
+  function bindOpt(id, init, onset){
+    const el = document.getElementById(id);
+    let v = init; el.setAttribute('aria-pressed', String(v));
+    el.addEventListener('click', ()=>{ v=!v; el.setAttribute('aria-pressed',String(v)); onset(v); });
+  }
+  bindOpt('optSound', true,  v=> soundOn = v);
+  bindOpt('optTheme', true,  v=>{ theme = v?'zw':'lcd'; applyTheme(); });
+  bindOpt('optWalls', false, v=>{ walls = v; });
+  bindOpt('optMaze',  false, v=>{ maze = v; if (started) { buildMaze(); } });
+  walls = false; maze = false; theme = 'zw'; applyTheme();
+
+  // ---------- Step ----------
+  function step(){
+    if (!alive || paused || !started) return;
+    dir = nextDir;
+    let nx = snake[0].x + dir.x, ny = snake[0].y + dir.y;
+
+    if (walls){
+      if (nx<0||ny<0||nx>=COLS||ny>=ROWS) return die();
+    } else {
+      nx = (nx+COLS)%COLS; ny = (ny+ROWS)%ROWS;
+    }
+    if (isMaze(nx,ny)) return die();
+    if (snake.some((s,i)=> i<snake.length-1 && s.x===nx && s.y===ny)) return die();
+
+    const head = {x:nx,y:ny};
+    snake.unshift(head);
+
+    if (food.x===nx && food.y===ny){
+      score += 10; foodsEaten++; sEat();
+      level = 1 + Math.floor(score/80);
+      stepMs = Math.max(70, 150 - (level-1)*9);
+      placeFood(); maybeBonus();
+    } else if (bonus && bonus.x===nx && bonus.y===ny){
+      score += 50; sBonus(); bonus = null;
+    } else {
+      snake.pop();
+    }
+  }
+  function die(){
+    alive = false; sDie();
+    if (score > high){ high = score; saveHigh(high); }
+  }
+
+  // ---------- Drawing ----------
+  function cell(gx, gy){ return { x:gx*CELL, y:HUD + gy*CELL }; }
+  function block(gx, gy, color, inset=1){
+    const p = cell(gx,gy);
+    ctx.fillStyle = color;
+    ctx.fillRect(p.x+inset, p.y+inset, CELL-inset*2, CELL-inset*2);
+  }
+  function dimGrid(){
+    ctx.fillStyle = pal.faint;
+    for (let y=0;y<ROWS;y++) for (let x=0;x<COLS;x++){
+      const p = cell(x,y);
+      ctx.fillRect(p.x+CELL-1, p.y+1, 1, CELL-1); // faint pixel lattice
+    }
+  }
+  function drawGlasses(gx, gy){            // Mugabe's signature square specs on the head
+    const p = cell(gx,gy);
+    ctx.fillStyle = pal.screen;            // lenses = screen colour (knockout)
+    const m = 3, lens = 3;
+    ctx.fillRect(p.x+m,       p.y+5, lens, lens);
+    ctx.fillRect(p.x+CELL-m-lens, p.y+5, lens, lens);
+    ctx.fillStyle = pal.ink === '#ffd200' ? '#0d0f0d' : pal.ink;
+    ctx.fillRect(p.x+m-1,         p.y+4, lens+2, 1);             // top rims
+    ctx.fillRect(p.x+CELL-m-lens-1, p.y+4, lens+2, 1);
+    ctx.fillRect(p.x+m+lens, p.y+6, CELL-2*(m+lens), 1);        // bridge
+  }
+  function drawStar(gx, gy, color){
+    const p = cell(gx,gy), cxp = p.x+CELL/2, cyp = p.y+CELL/2, r=CELL/2-1.5;
+    ctx.fillStyle = color; ctx.beginPath();
+    for (let i=0;i<10;i++){
+      const ang = -Math.PI/2 + i*Math.PI/5, rr = i%2?r*0.45:r;
+      const px = cxp + Math.cos(ang)*rr, py = cyp + Math.sin(ang)*rr;
+      i? ctx.lineTo(px,py) : ctx.moveTo(px,py);
+    }
+    ctx.closePath(); ctx.fill();
+  }
+
+  function snakeColor(i){
+    if (theme === 'zw') return ZW.cycle[i % ZW.cycle.length];
+    return pal.ink;
+  }
+
+  function drawTouchZones(){
+    const now = performance.now();
+    const dirs = ['up','down','left','right'];
+    const asz = 11, mg = 8;
+    dirs.forEach(d=>{
+      const active = touchFlash && touchFlash.dir === d && now < touchFlash.until;
+      ctx.save();
+      ctx.globalAlpha = active ? 0.60 : 0.18;
+      ctx.fillStyle = theme === 'zw' ? '#ffd200' : pal.ink;
+      const mx = W/2, my = HUD + FH/2;
+      ctx.beginPath();
+      if (d==='up'){
+        ctx.moveTo(mx, HUD+mg); ctx.lineTo(mx-asz, HUD+mg+asz*1.5); ctx.lineTo(mx+asz, HUD+mg+asz*1.5);
+      } else if (d==='down'){
+        ctx.moveTo(mx, HUD+FH-mg); ctx.lineTo(mx-asz, HUD+FH-mg-asz*1.5); ctx.lineTo(mx+asz, HUD+FH-mg-asz*1.5);
+      } else if (d==='left'){
+        ctx.moveTo(mg, my); ctx.lineTo(mg+asz*1.5, my-asz); ctx.lineTo(mg+asz*1.5, my+asz);
+      } else {
+        ctx.moveTo(W-mg, my); ctx.lineTo(W-mg-asz*1.5, my-asz); ctx.lineTo(W-mg-asz*1.5, my+asz);
+      }
+      ctx.closePath(); ctx.fill();
+      ctx.restore();
+    });
+  }
+
+  function drawFrame(){
+    // screen + hud
+    ctx.fillStyle = pal.screen; ctx.fillRect(0,0,W,cv.height);
+    dimGrid();
+    // HUD
+    ctx.fillStyle = pal.dim; ctx.fillRect(0,0,W,HUD);
+    ctx.fillStyle = pal.ink; ctx.fillRect(0,HUD-2,W,2);
+    pixelText('SCORE '+score, 6, 4, {scale:2, color: theme==='zw'?'#ffd200':pal.screen});
+    pixelText('HI '+high, W-6, 4, {scale:2, align:'right', color: theme==='zw'?'#ffd200':pal.screen});
+  }
+
+  function drawPlay(){
+    drawFrame();
+    drawTouchZones();
+    if (maze) for (const k of mazeCells){ const [x,y]=k.split(',').map(Number);
+      block(x,y, theme==='zw'?'#1f9d3b':pal.ink, 1); }
+
+    // food
+    if (theme==='zw') drawStar(food.x, food.y, pal.star);
+    else if (Math.floor(blink/220)%2===0) block(food.x, food.y, pal.ink, 3);
+    else block(food.x, food.y, pal.ink, 4);
+
+    // bonus (flashing)
+    if (bonus && Math.floor(blink/130)%2===0){
+      drawStar(bonus.x, bonus.y, theme==='zw' ? '#ffd200' : pal.ink);
+    }
+
+    // snake
+    for (let i=snake.length-1;i>=0;i--){
+      block(snake[i].x, snake[i].y, snakeColor(i), 1);
+    }
+    drawGlasses(snake[0].x, snake[0].y);
+
+    if (paused){
+      shade();
+      pixelText('PAUSED', W/2, HUD+FH/2-12, {scale:3, align:'center', color: theme==='zw'?'#ffd200':pal.ink});
+    }
+  }
+
+  function shade(){ ctx.fillStyle = theme==='zw'?'rgba(0,0,0,.45)':'rgba(28,42,16,.18)';
+    ctx.fillRect(0,HUD,W,FH); }
+
+  // Zimbabwe flag, drawn small on the title screen
+  function drawFlag(x,y,w){
+    const h = w*7/12, sh = h/7;
+    const stripes = ['#1f9d3b','#ffd200','#de2010','#000000','#de2010','#ffd200','#1f9d3b'];
+    for (let i=0;i<7;i++){ ctx.fillStyle=stripes[i]; ctx.fillRect(x,y+i*sh,w,sh+0.5); }
+    ctx.fillStyle='#ffffff'; ctx.beginPath();
+    ctx.moveTo(x,y); ctx.lineTo(x+w*0.42,y+h/2); ctx.lineTo(x,y+h); ctx.closePath(); ctx.fill();
+    // red star inside the hoist triangle (absolute coords)
+    const sx = x + w*0.12, sy = y + h/2, r = h*0.16;
+    ctx.fillStyle = '#de2010'; ctx.beginPath();
+    for (let i=0;i<10;i++){
+      const ang = -Math.PI/2 + i*Math.PI/5, rr = i%2?r*0.45:r;
+      const px = sx + Math.cos(ang)*rr, py = sy + Math.sin(ang)*rr;
+      i? ctx.lineTo(px,py) : ctx.moveTo(px,py);
+    }
+    ctx.closePath(); ctx.fill();
+  }
+
+  function drawTitle(){
+    ctx.fillStyle = pal.screen; ctx.fillRect(0,0,W,cv.height);
+    dimGrid();
+    const yellow = theme==='zw'?'#ffd200':pal.ink;
+    pixelText('GUSHUNGO', W/2, 16, {scale:4, align:'center', color: yellow});
+    pixelText('S N A K E', W/2, 56, {scale:3, align:'center', color: pal.ink});
+    pixelText('ZIMBABWE EDITION', W/2, 84, {scale:2, align:'center', color: pal.dim==='#86a531'?pal.ink:'#1f9d3b'});
+    drawFlag(W/2-40, 104, 80);
+    if (Math.floor(blink/450)%2===0)
+      pixelText('PRESS  START', W/2, 176, {scale:3, align:'center', color: yellow});
+    pixelText('R.G. MUGABE 1924-2019', W/2, 214, {scale:2, align:'center', color: pal.dim==='#86a531'?pal.dim:'#27331f'});
+  }
+
+  function drawGameOver(){
+    drawPlay();
+    shade(); shade();
+    ctx.fillStyle = theme==='zw'?'rgba(0,0,0,.55)':'rgba(28,42,16,.30)';
+    ctx.fillRect(0,HUD,W,FH);
+    const yellow = theme==='zw'?'#ffd200':pal.ink;
+    pixelText('GAME OVER', W/2, HUD+34, {scale:4, align:'center', color: yellow});
+    pixelText('SCORE '+score, W/2, HUD+82, {scale:3, align:'center', color: pal.ink});
+    pixelText('HIGH '+high, W/2, HUD+108, {scale:2, align:'center', color: pal.ink});
+    if (Math.floor(blink/450)%2===0)
+      pixelText('PRESS START', W/2, HUD+148, {scale:2, align:'center', color: yellow});
+  }
+
+  // ---------- Loop ----------
+  function frame(t){
+    const dt = t - last; last = t; blink += dt;
+    if (started && alive && !paused){
+      acc += dt;
+      if (bonus){ bonus.ttl -= dt; if (bonus.ttl <= 0) bonus = null; }
+      while (acc >= stepMs){ acc -= stepMs; step(); }
+    }
+    if (!started)       drawTitle();
+    else if (!alive)    drawGameOver();
+    else                drawPlay();
+    requestAnimationFrame(frame);
+  }
+
+  // ---------- Boot ----------
+  started = false; alive = true; reset(); started = false;
+  requestAnimationFrame(t=>{ last = t; frame(t); });
+})();
+</script>
+</body>
+</html>
