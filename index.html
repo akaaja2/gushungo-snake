@@ -30,7 +30,7 @@
 
   /* ---- The phone ---- */
   .phone{
-    width:300px;max-width:94vw;
+    width:min(96vw,500px);
     background:linear-gradient(160deg,var(--body-hi),var(--body) 32%,var(--body-edge));
     border-radius:46px 46px 70px 70px / 60px 60px 120px 120px;
     padding:22px 20px 26px;
@@ -38,7 +38,7 @@
       inset 0 2px 0 rgba(255,255,255,.14),
       inset 0 -10px 24px rgba(0,0,0,.45),
       0 26px 50px rgba(0,0,0,.55);
-    position:relative;
+    position:relative;z-index:2;
   }
   .speaker{width:64px;height:7px;border-radius:5px;margin:0 auto 14px;
     background:#141d2c;box-shadow:inset 0 1px 2px #000,0 1px 0 rgba(255,255,255,.06)}
@@ -61,7 +61,7 @@
 
   /* ---- Keypad ---- */
   .pad{margin-top:18px;display:flex;flex-direction:column;align-items:center;gap:12px}
-  .softrow{display:flex;justify-content:space-between;width:200px}
+  .softrow{display:flex;justify-content:space-between;width:200px;gap:8px}
   .soft{
     width:58px;height:26px;border-radius:6px 6px 14px 14px;
     background:linear-gradient(180deg,var(--key),var(--key-edge));
@@ -85,6 +85,17 @@
     border:none;cursor:pointer;color:#26324a;font-weight:800;font-size:11px;
     box-shadow:0 2px 0 #818b9b,0 5px 10px rgba(0,0,0,.45)}
   .ok:active{transform:translateY(2px)}
+  .numpad{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;width:200px;margin-top:12px}
+  .nkey{
+    background:linear-gradient(180deg,var(--key),var(--key-edge));
+    border:none;border-radius:7px;height:34px;padding:0 4px;
+    font-size:13px;font-weight:800;color:var(--key-text);letter-spacing:.02em;
+    box-shadow:0 2px 0 #7e8898,0 3px 6px rgba(0,0,0,.4);cursor:pointer;
+    display:flex;align-items:center;justify-content:center;gap:3px;font-family:inherit;
+  }
+  .nkey span{font-size:7px;font-weight:600;opacity:.60;text-transform:uppercase;letter-spacing:.05em}
+  .nkey:active{transform:translateY(2px);box-shadow:0 0 0 #818b9b}
+  .nkey:focus-visible{outline:2px solid #ffd200;outline-offset:2px}
 
   /* ---- Options ---- */
   .opts{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;max-width:320px}
@@ -98,6 +109,63 @@
   .hint{font-size:11px;color:#5e7793;text-align:center;max-width:320px;line-height:1.5}
   a{color:#7fa8d8}
   @media (prefers-reduced-motion: reduce){*{animation:none !important}}
+
+    /* ───── Retro stickers (on the phone body) ───── */
+  .sticker{
+    position:absolute;pointer-events:none;user-select:none;
+    font-family:Impact,'Arial Black','Helvetica Neue',sans-serif;
+    text-transform:uppercase;letter-spacing:.05em;
+  }
+
+  /* ── Sticker 1: "I ♥ PPP" badge — left flank ── */
+  .s-pp{
+    left:-18px;top:52%;
+    width:76px;height:76px;border-radius:50%;
+    background:radial-gradient(circle at 36% 32%,#ff6677 0%,#cc1133 70%);
+    border:3px solid #fff;
+    display:flex;align-items:center;justify-content:center;text-align:center;
+    font-size:13px;font-weight:900;color:#fff;line-height:1.25;
+    text-shadow:1px 2px 0 rgba(0,0,0,.6);
+    transform:rotate(-18deg);
+    box-shadow:3px 5px 12px rgba(0,0,0,.65),
+      inset 0 0 0 4px rgba(255,255,255,.18),
+      inset 0 2px 0 rgba(255,255,255,.28);
+    z-index:3;
+  }
+  .s-pp::before{
+    content:'';position:absolute;inset:5px;border-radius:50%;
+    border:1.5px dashed rgba(255,255,255,.4);
+  }
+
+  /* ── Sticker 2: Eastbourne — right flank ── */
+  .s-eb{
+    right:-14px;bottom:28%;
+    background:
+      repeating-linear-gradient(-52deg,transparent,transparent 5px,rgba(0,0,0,.04) 5px,rgba(0,0,0,.04) 10px),
+      linear-gradient(145deg,#00e0b0,#00b890);
+    color:#03140f;
+    padding:9px 11px 10px;border-radius:7px;
+    border:3px solid #fff;
+    font-size:10px;font-weight:900;line-height:1.4;
+    text-align:center;max-width:90px;
+    transform:rotate(13deg);
+    box-shadow:-3px 5px 12px rgba(0,0,0,.65),inset 0 2px 0 rgba(255,255,255,.38);
+    z-index:3;
+  }
+  .s-eb::before{
+    content:'⚽ PRIDE ⚽';
+    display:block;font-size:7px;letter-spacing:.12em;
+    color:#006644;margin-bottom:4px;font-weight:900;
+  }
+  .s-eb::after{
+    content:'★ ★ ★';
+    display:block;font-size:8px;color:#006644;
+    margin-top:4px;letter-spacing:.15em;
+  }
+  @media(max-width:530px){
+    .s-pp{width:70px;height:70px;font-size:12px;left:-16px;top:8vh}
+    .s-eb{font-size:10px;max-width:88px;right:-12px;padding:9px 11px 10px}
+  }
 </style>
 </head>
 <body>
@@ -126,7 +194,24 @@
           <button class="ok" id="okBtn" aria-label="Select">OK</button>
         </div>
       </div>
+      <div class="numpad">
+        <button class="nkey">1</button>
+        <button class="nkey">2 <span>abc</span></button>
+        <button class="nkey">3 <span>def</span></button>
+        <button class="nkey">4 <span>ghi</span></button>
+        <button class="nkey" id="nk5">5 <span>jkl</span></button>
+        <button class="nkey">6 <span>mno</span></button>
+        <button class="nkey">7 <span>pqrs</span></button>
+        <button class="nkey">8 <span>tuv</span></button>
+        <button class="nkey">9 <span>wxyz</span></button>
+        <button class="nkey" id="nkStar">✱</button>
+        <button class="nkey">0 <span>+</span></button>
+        <button class="nkey" id="nkHash">#</button>
+      </div>
     </div>
+  <!-- stickers on the phone body -->
+    <div class="sticker s-pp" aria-hidden="true">I&nbsp;♥<br>PPP</div>
+    <div class="sticker s-eb" aria-hidden="true">Eastbourne<br>side is<br>da best</div>
   </div>
 
   <div class="opts">
@@ -136,7 +221,7 @@
     <button class="opt" id="optMaze"   aria-pressed="false">🌀 Maze</button>
   </div>
   <div class="hint">
-    Arrow keys / WASD or the D-pad to steer · <b>Space</b> to start &amp; pause · on mobile, tap the <b>edge zones</b> (arrows) to steer, tap centre to start/pause.<br>
+    Arrow keys / WASD or the D-pad to steer · <b>Space</b> to start &amp; pause · on mobile, <b>touch &amp; drag</b> anywhere — a joystick appears under your thumb. Lift and re-touch to reposition it.<br>
     Wrap-around walls and bonus items, just like Snake&nbsp;II.
   </div>
 
@@ -145,8 +230,9 @@
   "use strict";
 
   // ---------- Grid / canvas ----------
-  const COLS = 24, ROWS = 16, CELL = 14;
+  const COLS = 26, ROWS = 18, CELL = 16;
   const HUD = 26;                         // top status strip (px)
+  const JR_BASE=54, JR_DEAD=16, JR_THUMB=23;  // joystick radii in canvas-px
   const W = COLS * CELL, FH = ROWS * CELL;
   const cv = document.getElementById('game');
   const ctx = cv.getContext('2d');
@@ -192,6 +278,7 @@
   let snake, dir, nextDir, food, bonus, walls, maze, mazeCells;
   let score, high = loadHigh(), level, alive, started, paused;
   let stepMs, acc = 0, last = 0, blink = 0, foodsEaten;
+  let sms = null; // null | {state:'notify'|'read'}
 
   function loadHigh(){ try { return parseInt(localStorage.getItem('gushungo-high')||'0',10)||0; } catch(e){ return 0; } }
   function saveHigh(v){ try { localStorage.setItem('gushungo-high', String(v)); } catch(e){} }
@@ -251,6 +338,7 @@
   const sTurn  = ()=> beep(420,.02,'square',.03);
   const sStart = ()=>{ beep(660,.09); setTimeout(()=>beep(880,.09),100); setTimeout(()=>beep(1175,.13),200); };
   const sDie   = ()=>{ beep(300,.12,'square',.07); setTimeout(()=>beep(180,.22,'square',.07),120); };
+  const sNotif = ()=>{ beep(880,.06); setTimeout(()=>beep(1109,.06),110); setTimeout(()=>beep(1319,.09),220); };
 
   // ---------- Input ----------
   function setDir(name){
@@ -271,45 +359,80 @@
     b.addEventListener('click', ()=>setDir(b.dataset.dir));
   });
   document.getElementById('okBtn').addEventListener('click', primary);
+  document.getElementById('nk5').addEventListener('click', primary);
+  document.getElementById('nkHash').addEventListener('click', togglePause);
+  document.getElementById('nkStar').addEventListener('click', ()=>{
+    soundOn = !soundOn;
+    document.getElementById('optSound').setAttribute('aria-pressed', String(soundOn));
+  });
   document.getElementById('startBtn').addEventListener('click', ()=>{ if(!started||!alive) restart(); });
   document.getElementById('pauseBtn').addEventListener('click', togglePause);
 
-  // ---------- Touch-zone controls ----------
-  // Canvas divided into 4 diagonal quadrants; direction fires on touchstart (instant).
-  // A small central dead-zone acts as start / pause.
-  let touchFlash = null; // { dir:'up'|'down'|'left'|'right', until:timestamp }
+  // ---------- Floating joystick ----------
+  let joy = { active:false, ox:0, oy:0, tx:0, ty:0, dir:null };
+  let joyId = null;
 
-  function getZone(clientX, clientY){
-    const rect = cv.getBoundingClientRect();
-    const cx = (clientX - rect.left) / rect.width;   // 0-1
-    const cy = (clientY - rect.top)  / rect.height;  // 0-1
-    const hudFrac = HUD / cv.height;
-    if (cy < hudFrac) return null;                    // tapped HUD strip
-    const nx = cx - 0.5;
-    const ny = (cy - hudFrac) / (1 - hudFrac) - 0.5;
-    if (Math.abs(nx) < 0.12 && Math.abs(ny) < 0.12) return 'center';
-    return Math.abs(ny) > Math.abs(nx)
-      ? (ny < 0 ? 'up' : 'down')
-      : (nx < 0 ? 'left' : 'right');
+  function toCanvas(cx, cy){
+    const r = cv.getBoundingClientRect();
+    return { x:(cx-r.left)*(cv.width/r.width), y:(cy-r.top)*(cv.height/r.height) };
   }
 
   cv.addEventListener('touchstart', e=>{
     e.preventDefault();
-    if (actx && actx.state === 'suspended') actx.resume();
-    const t = e.touches[0];
-    const zone = getZone(t.clientX, t.clientY);
-    if (!zone || zone === 'center'){ primary(); return; }
-    touchFlash = { dir: zone, until: performance.now() + 240 };
-    setDir(zone);
-  }, {passive: false});
+    if(actx && actx.state==='suspended') actx.resume();
+    const t = e.changedTouches[0];
+    const p = toCanvas(t.clientX, t.clientY);
+    // SMS intercept
+    if(sms){ advanceSms(); return; }
+    // HUD tap or not-yet-started
+    if(!started || !alive || p.y < HUD){ primary(); return; }
+    // start joystick
+    if(joy.active) return;
+    joyId = t.identifier;
+    joy.active = true;
+    joy.ox = p.x;
+    joy.oy = Math.max(HUD + JR_BASE + 4, Math.min(p.y, cv.height - JR_BASE - 4));
+    joy.tx = p.x; joy.ty = joy.oy; joy.dir = null;
+  }, {passive:false});
+
+  cv.addEventListener('touchmove', e=>{
+    e.preventDefault();
+    if(!joy.active) return;
+    const t = Array.from(e.touches).find(t=>t.identifier===joyId);
+    if(!t) return;
+    const p = toCanvas(t.clientX, t.clientY);
+    joy.tx = p.x; joy.ty = p.y;
+    const dx=joy.tx-joy.ox, dy=joy.ty-joy.oy, dist=Math.hypot(dx,dy);
+    if(dist < JR_DEAD) return;
+    const nd = Math.abs(dy)>Math.abs(dx) ? (dy<0?'up':'down') : (dx<0?'left':'right');
+    if(nd !== joy.dir){ joy.dir=nd; setDir(nd); }
+  }, {passive:false});
+
+  cv.addEventListener('touchend', e=>{
+    const t = Array.from(e.changedTouches).find(t=>t.identifier===joyId);
+    if(t){ joy.active=false; joy.dir=null; joyId=null; }
+  }, {passive:true});
+
+  // ---------- SMS ----------
+  const SMS_FROM='Angus', SMS_BODY='Torture Garden?';
+  function triggerSms(){ if(sms) return; sms={state:'notify'}; sNotif(); }
+  function advanceSms(){
+    if(!sms) return;
+    if(sms.state==='notify') sms.state='read';
+    else sms=null;
+  }
 
   function primary(){
-    if (actx && actx.state === 'suspended') actx.resume();
-    if (!started || !alive){ restart(); }
+    if(actx && actx.state==='suspended') actx.resume();
+    if(sms){ advanceSms(); return; }
+    if(!started || !alive){ restart(); }
     else { togglePause(); }
   }
-  function togglePause(){ if (started && alive){ paused = !paused; } }
-  function restart(){ reset(); started = true; sStart(); }
+  function togglePause(){ if(started && alive){ paused=!paused; } }
+  function restart(){
+    sms=null; reset(); started=true; sStart();
+    setTimeout(()=>{ if(alive && started && !sms) triggerSms(); }, 5000);
+  }
 
   // ---------- Options ----------
   function bindOpt(id, init, onset){
@@ -397,29 +520,65 @@
     return pal.ink;
   }
 
-  function drawTouchZones(){
-    const now = performance.now();
-    const dirs = ['up','down','left','right'];
-    const asz = 11, mg = 8;
-    dirs.forEach(d=>{
-      const active = touchFlash && touchFlash.dir === d && now < touchFlash.until;
-      ctx.save();
-      ctx.globalAlpha = active ? 0.60 : 0.18;
-      ctx.fillStyle = theme === 'zw' ? '#ffd200' : pal.ink;
-      const mx = W/2, my = HUD + FH/2;
-      ctx.beginPath();
-      if (d==='up'){
-        ctx.moveTo(mx, HUD+mg); ctx.lineTo(mx-asz, HUD+mg+asz*1.5); ctx.lineTo(mx+asz, HUD+mg+asz*1.5);
-      } else if (d==='down'){
-        ctx.moveTo(mx, HUD+FH-mg); ctx.lineTo(mx-asz, HUD+FH-mg-asz*1.5); ctx.lineTo(mx+asz, HUD+FH-mg-asz*1.5);
-      } else if (d==='left'){
-        ctx.moveTo(mg, my); ctx.lineTo(mg+asz*1.5, my-asz); ctx.lineTo(mg+asz*1.5, my+asz);
-      } else {
-        ctx.moveTo(W-mg, my); ctx.lineTo(W-mg-asz*1.5, my-asz); ctx.lineTo(W-mg-asz*1.5, my+asz);
-      }
-      ctx.closePath(); ctx.fill();
-      ctx.restore();
-    });
+  function drawJoystick(){
+    if(!joy.active) return;
+    const ox=joy.ox, oy=joy.oy;
+    const dx=joy.tx-ox, dy=joy.ty-oy, dist=Math.hypot(dx,dy);
+    const cl=Math.min(dist, JR_BASE);
+    const tx=dist>0?ox+dx/dist*cl:ox, ty=dist>0?oy+dy/dist*cl:oy;
+    const jc = theme==='zw'?'#ffd200':pal.ink;
+    ctx.save();
+    // outer ring
+    ctx.globalAlpha=0.28; ctx.strokeStyle=jc; ctx.lineWidth=2.5;
+    ctx.beginPath(); ctx.arc(ox,oy,JR_BASE,0,Math.PI*2); ctx.stroke();
+    // crosshairs
+    ctx.globalAlpha=0.10; ctx.lineWidth=1.2;
+    ctx.beginPath();
+    ctx.moveTo(ox-JR_BASE,oy); ctx.lineTo(ox+JR_BASE,oy);
+    ctx.moveTo(ox,oy-JR_BASE); ctx.lineTo(ox,oy+JR_BASE);
+    ctx.stroke();
+    // dead-zone ring
+    ctx.globalAlpha=0.14; ctx.lineWidth=1;
+    ctx.beginPath(); ctx.arc(ox,oy,JR_DEAD,0,Math.PI*2); ctx.stroke();
+    // thumb
+    ctx.globalAlpha=0.65; ctx.fillStyle=jc;
+    ctx.beginPath(); ctx.arc(tx,ty,JR_THUMB,0,Math.PI*2); ctx.fill();
+    ctx.restore();
+  }
+
+  function drawEnvelope(cx,cy,ew,eh){
+    ctx.fillStyle=pal.screen; ctx.fillRect(cx-ew/2,cy-eh/2,ew,eh);
+    const ac=theme==='zw'?'#ffd200':pal.ink;
+    ctx.strokeStyle=ac; ctx.lineWidth=1.5; ctx.strokeRect(cx-ew/2,cy-eh/2,ew,eh);
+    ctx.fillStyle=ac; ctx.beginPath();
+    ctx.moveTo(cx-ew/2,cy-eh/2); ctx.lineTo(cx,cy+3); ctx.lineTo(cx+ew/2,cy-eh/2);
+    ctx.closePath(); ctx.fill();
+  }
+
+  function drawSmsNotify(){
+    shade(); shade();
+    const bx=22, by=HUD+FH/2-48, bw=W-44, bh=96;
+    ctx.fillStyle=pal.screen; ctx.fillRect(bx,by,bw,bh);
+    const ac=theme==='zw'?'#ffd200':pal.ink;
+    ctx.strokeStyle=ac; ctx.lineWidth=2; ctx.strokeRect(bx,by,bw,bh);
+    drawEnvelope(bx+28, by+bh/2-4, 30, 22);
+    pixelText('1 Message', bx+52, by+16, {scale:2, color:ac});
+    pixelText('From: '+SMS_FROM, bx+52, by+38, {scale:2, color:pal.ink});
+    if(Math.floor(blink/420)%2===0)
+      pixelText('[OK] Read', W/2, by+bh-20, {scale:2, align:'center', color:ac});
+  }
+
+  function drawSmsRead(){
+    ctx.fillStyle=pal.screen; ctx.fillRect(0,HUD,W,FH);
+    const ac=theme==='zw'?'#ffd200':pal.ink;
+    ctx.fillStyle=theme==='zw'?'#1f9d3b':pal.dim; ctx.fillRect(0,HUD,W,22);
+    pixelText('Messages  1/1', 6, HUD+3, {scale:2, color:ac});
+    ctx.fillStyle=pal.ink; ctx.fillRect(0,HUD+22,W,2);
+    pixelText('From: '+SMS_FROM, 8, HUD+34, {scale:2, color:ac});
+    ctx.fillStyle=pal.dim; ctx.fillRect(8,HUD+54,W-16,1);
+    pixelText(SMS_BODY, W/2, HUD+72, {scale:3, align:'center', color:pal.ink});
+    if(Math.floor(blink/450)%2===0)
+      pixelText('[OK] Close', W/2, HUD+FH-26, {scale:2, align:'center', color:ac});
   }
 
   function drawFrame(){
@@ -435,7 +594,6 @@
 
   function drawPlay(){
     drawFrame();
-    drawTouchZones();
     if (maze) for (const k of mazeCells){ const [x,y]=k.split(',').map(Number);
       block(x,y, theme==='zw'?'#1f9d3b':pal.ink, 1); }
 
@@ -455,7 +613,12 @@
     }
     drawGlasses(snake[0].x, snake[0].y);
 
-    if (paused){
+    if(joy.active && !sms) drawJoystick();
+    if(sms){
+      if(sms.state==='notify') drawSmsNotify();
+      else if(sms.state==='read') drawSmsRead();
+    }
+    if(paused && !sms){
       shade();
       pixelText('PAUSED', W/2, HUD+FH/2-12, {scale:3, align:'center', color: theme==='zw'?'#ffd200':pal.ink});
     }
@@ -511,7 +674,7 @@
   // ---------- Loop ----------
   function frame(t){
     const dt = t - last; last = t; blink += dt;
-    if (started && alive && !paused){
+    if (started && alive && !paused && !sms){
       acc += dt;
       if (bonus){ bonus.ttl -= dt; if (bonus.ttl <= 0) bonus = null; }
       while (acc >= stepMs){ acc -= stepMs; step(); }
